@@ -1,0 +1,27 @@
+This is an example on how to load the plugin in the config.json. It is NOT the complete config file of Pimatic!
+
+"plugins": [
+  {
+    "plugin": "dewpoint"
+  }
+],
+
+"devices": [
+  {
+    "id": "dew",
+    "class": "DewpointDevice",
+    "name": "Dew-Point",
+    "variables": [
+      {
+        "name": "humidity",
+        "type": "number",
+        "allocation": "$homeduino-airclimate.humidity"
+      },
+      {
+        "name": "temperature",
+        "type": "number",
+        "allocation": "$homeduino-airclimate.temperature"
+      }
+    ]
+  }
+]
