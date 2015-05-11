@@ -1,95 +1,103 @@
 module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
+  types = env.require('decl-api').types
 
-  class DewpointPlugin extends env.plugins.Plugin
-    
+  class DewPointPlugin extends env.plugins.Plugin
+
     init: (app, @framework, @config) =>
       env.logger.info("Hello new World")
       deviceConfigDef = require("./device-config-schema")
-      
-      @framework.deviceManager.registerDeviceClass("DewpointDevice", {
-        configDef: deviceConfigDef.DewpointDevice, 
-        createCallback: (config, lastState) => 
-          return new DewpointDevice(config, lastState)
+
+      @framework.deviceManager.registerDeviceClass("DewPointDevice", {
+        configDef: deviceConfigDef.DewPointDevice,
+        createCallback: (config, lastState) =>
+          return new DewPointDevice(config, lastState)
       })
-  
-  Dewpoint = new DewpointPlugin
-  
-  class DewpointDevice extends env.devices.TemperatureSensor
-    temperature: null
-    T: null
-    H: null
-    
+
+  plugin = new DewPointPlugin
+
+  class DewPointDevice extends env.devices.Device
+
+    temperature: 0.0
+    humidity: 0.0
+    dewPoint: 0.0
+
+    attributes:
+      temperature:
+        description: "Temperature"
+        type: types.number
+        unit: "°C"
+        acronym: 'T'
+      humidity:
+        description: "Relative Humidity"
+        type: types.number
+        unit: "%"
+        acronym: 'RH'
+      dewPoint:
+        description: "Dew Point Temperature"
+        type: types.number
+        unit: "°C"
+        acronym: 'DT'
+
     constructor: (@config, lastState) ->
       @id = config.id
       @name = config.name
-      @temperature = lastState?.temperature?.value
-      @T = lastState?.T?.value
-      @H = lastState?.H?.value
-      @varManager = Dewpoint.framework.variableManager #so you get the variableManager
+      @temperature = lastState?.temperature?.value or 0.0;
+      @humidity = lastState?.humidity?.value or 0.0;
+      @dewPoint = lastState?.dewPoint?.value or 0.0;
+      @varManager = plugin.framework.variableManager #so you get the variableManager
       @_exprChangeListeners = []
-      @attributes = {}
-     
-      for variable in @config.variables
-        do (variable) =>
-          name = variable.name
+
+      for reference in [
+        {name: "temperature", expression: config.temperatureRef},
+        {name: "humidity", expression: config.humidityRef}
+      ]
+        do (reference) =>
+          name = reference.name
           info = null
-          
-          @attributes[name] = {
-            description: name
-            label: (if variable.label? then variable.label else "$#{name}")
-            type: variable.type or "string"
-          }
-          
-          evaluate = ( => 
-            # wait till veraibelmanager is ready
-            return Promise.delay(1).then( =>
+
+          evaluate = ( =>
+            # wait till VariableManager is ready
+            return Promise.delay(10).then(=>
               unless info?
-
-                info = @varManager.parseVariableExpression(variable.allocation) 
-
+                info = @varManager.parseVariableExpression(reference.expression)
                 @varManager.notifyOnChange(info.tokens, evaluate)
                 @_exprChangeListeners.push evaluate
-              if @attributes[name].type is "number"
-                unless @attributes[name].unit? and @attributes[name].unit.length > 0
-                  @attributes[name].unit = @varManager.inferUnitOfExpression(info.tokens)
+
               switch info.datatype
                 when "numeric" then @varManager.evaluateNumericExpression(info.tokens)
                 when "string" then @varManager.evaluateStringExpression(info.tokens)
-                else assert false
-            ).then( (val) =>
-              if val isnt @_attributesMeta[name].value
-                console.log(name)
-                console.log(val)
-                console.log(evaluate)
-                @emit name, val
-                switch variable.name
-                  when "humidity" then @H = val
-                  when "temperature" then @T = val                
-              return val
+                else
+                  assert false
+            ).then((val) =>
+              if val
+                env.logger.debug name, val
+                @_setAttribute name, val
+                @doYourStuff()
+              return @[name]
             )
           )
           @_createGetter(name, evaluate)
       super()
-   
-      @doYourStuff()
-      setInterval( ( => @doYourStuff() ), @config.interval)
- 
+
     doYourStuff: ->
-      a=7.5
-      b=237.3
-      #T=23  #temperature
-      #H=40  #humidity
+      a = 7.5
+      b = 237.3
 
-      sdd=6.1078 * Math.pow(10,(a*@T)/(b+@T))
-      dd=sdd*(@H/100)
-      v=Math.log(dd/6.1078)/Math.log(10)
-      td=(b*v)/(a-v)
-      
-      @temperature = td
-      @emit 'temperature', td
+      sdd = 6.1078 * Math.pow(10, (a * @temperature) / (b + @temperature))
+      dd = sdd * (@humidity / 100)
+      v = Math.log(dd / 6.1078) / Math.log(10)
+      td = (b * v) / (a - v)
+      env.logger.debug 'dewPoint', td
+      @_setAttribute 'dewPoint', td
 
-    getTemperature: -> Promise.resolve(@temperature)
+    _setAttribute: (attributeName, value) ->
+      if @[attributeName] isnt value
+        @[attributeName] = value
+        @emit attributeName, value
 
-  return Dewpoint
+    # getters for temperature & humidity are created by the constructor using @_createGetter method
+    getDewPoint: -> Promise.resolve(@dewPoint)
+
+  return plugin
