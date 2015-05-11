@@ -1,4 +1,5 @@
-{ "name": "pimatic-dewpoint",
+{
+  "name": "pimatic-dewpoint",
   "description": "Calculates the dew point from temperature and humidity",
   "author": "flybysun",
   "main": "dewpoint",
@@ -7,13 +8,22 @@
     "README.md",
     "dewpoint-config-schema.coffee"
   ],
-  "version": "0.8.0",
+  "version": "0.9.0",
   "homepage": "https://github.com/flybysun/dev-pimatic-dewpoint/tree/master",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
+    "url": "git://github.com/flybysun/dev-pimatic-dewpoint.git"
   },
+  "bugs": {
+    "url": "https://github.com/flybysun/dev-pimatic-dewpoint/issues"
+  },
+  "licenses": [
+    {
+      "type": "GPLv2",
+      "url": "https://github.com/flybysun/dev-pimatic-dewpoint/blob/master/LICENSE"
+    }
+  ],
   "configSchema": "dewpoint-config-schema.coffee",
   "dependencies": {
   },

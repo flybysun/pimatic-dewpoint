@@ -8,9 +8,9 @@ variables in Pimatic.
 Example:
 
     {
-          "id": "dew1",
-          "class": "DewPointDevice",
-          "name": "Dew Point Temperature",
-          "temperatureRef": "$mySensor1.temperature",
-          "humidityRef": "$mySensor1.humidity"
+        "id": "dew",
+        "class": "DewPointDevice",
+        "name": "Dew Point",
+        "temperatureRef": "$homeduino-airclimate.temperature",
+        "humidityRef": "$homeduino-airclimate.humidity"
     }

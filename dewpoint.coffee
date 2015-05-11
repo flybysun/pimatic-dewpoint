@@ -4,14 +4,14 @@ module.exports = (env) ->
   types = env.require('decl-api').types
 
   class DewPointPlugin extends env.plugins.Plugin
-    
+
     init: (app, @framework, @config) =>
       env.logger.info("Hello new World")
       deviceConfigDef = require("./device-config-schema")
-      
+
       @framework.deviceManager.registerDeviceClass("DewPointDevice", {
-        configDef: deviceConfigDef.DewPointDevice, 
-        createCallback: (config, lastState) => 
+        configDef: deviceConfigDef.DewPointDevice,
+        createCallback: (config, lastState) =>
           return new DewPointDevice(config, lastState)
       })
 
@@ -43,9 +43,9 @@ module.exports = (env) ->
     constructor: (@config, lastState) ->
       @id = config.id
       @name = config.name
-      @temperature= lastState?.temperature?.value or 0.0;
-      @humidity= lastState?.humidity?.value or 0.0;
-      @dewPoint= lastState?.dewPoint?.value or 0.0;
+      @temperature = lastState?.temperature?.value or 0.0;
+      @humidity = lastState?.humidity?.value or 0.0;
+      @dewPoint = lastState?.dewPoint?.value or 0.0;
       @varManager = plugin.framework.variableManager #so you get the variableManager
       @_exprChangeListeners = []
 
@@ -59,7 +59,7 @@ module.exports = (env) ->
 
           evaluate = ( =>
             # wait till VariableManager is ready
-            return Promise.delay(10).then( =>
+            return Promise.delay(10).then(=>
               unless info?
                 info = @varManager.parseVariableExpression(reference.expression)
                 @varManager.notifyOnChange(info.tokens, evaluate)
@@ -68,8 +68,9 @@ module.exports = (env) ->
               switch info.datatype
                 when "numeric" then @varManager.evaluateNumericExpression(info.tokens)
                 when "string" then @varManager.evaluateStringExpression(info.tokens)
-                else assert false
-            ).then( (val) =>
+                else
+                  assert false
+            ).then((val) =>
               if val
                 env.logger.debug name, val
                 @_setAttribute name, val
@@ -81,13 +82,13 @@ module.exports = (env) ->
       super()
 
     doYourStuff: ->
-      a=7.5
-      b=237.3
+      a = 7.5
+      b = 237.3
 
-      sdd=6.1078 * Math.pow(10,(a*@temperature)/(b+@temperature))
-      dd=sdd*(@humidity/100)
-      v=Math.log(dd/6.1078)/Math.log(10)
-      td=(b*v)/(a-v)
+      sdd = 6.1078 * Math.pow(10, (a * @temperature) / (b + @temperature))
+      dd = sdd * (@humidity / 100)
+      v = Math.log(dd / 6.1078) / Math.log(10)
+      td = (b * v) / (a - v)
       env.logger.debug 'dewPoint', td
       @_setAttribute 'dewPoint', td
 
