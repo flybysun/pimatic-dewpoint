@@ -1,12 +1,27 @@
 {
   "name": "pimatic-dewpoint",
   "description": "Calculates the dew point from temperature and humidity",
-  "author": "flybysun",
+  "author": {
+    "name": "flybysun",
+    "url": "https://github.com/flybysun"
+  },
+  "contributors": [
+    {
+      "name": "Marcus Wittig",
+      "url": "https://github.com/mwittig"
+    }
+  ],
   "main": "dewpoint",
   "files": [
     "dewpoint.coffee",
     "README.md",
-    "dewpoint-config-schema.coffee"
+    "LICENSE",
+    "dewpoint-config-schema.coffee",
+    "device-config-schema.coffee"
+  ],
+  "keywords": [
+    "Dew Point",
+    "Pimatic"
   ],
   "version": "0.9.0",
   "homepage": "https://github.com/flybysun/dev-pimatic-dewpoint/tree/master",
@@ -22,6 +37,12 @@
     {
       "type": "GPLv2",
       "url": "https://github.com/flybysun/dev-pimatic-dewpoint/blob/master/LICENSE"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "flybysun",
+      "url": "https://github.com/flybysun"
     }
   ],
   "configSchema": "dewpoint-config-schema.coffee",
