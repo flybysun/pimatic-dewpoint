@@ -6,7 +6,6 @@ module.exports = (env) ->
   class DewPointPlugin extends env.plugins.Plugin
 
     init: (app, @framework, @config) =>
-      env.logger.info("Hello new World")
       deviceConfigDef = require("./device-config-schema")
 
       @framework.deviceManager.registerDeviceClass("DewPointDevice", {
@@ -74,16 +73,21 @@ module.exports = (env) ->
               if val
                 env.logger.debug name, val
                 @_setAttribute name, val
-                @doYourStuff()
+                @DewpointCalculation()
               return @[name]
             )
           )
           @_createGetter(name, evaluate)
       super()
 
-    doYourStuff: ->
-      a = 7.5
-      b = 237.3
+    DewpointCalculation: ->
+      
+      if @temperature >= 0
+        a = 7.5
+        b = 237.3
+      else
+        a = 7.6
+        b = 240.7
 
       sdd = 6.1078 * Math.pow(10, (a * @temperature) / (b + @temperature))
       dd = sdd * (@humidity / 100)
