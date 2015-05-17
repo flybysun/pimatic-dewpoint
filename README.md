@@ -51,5 +51,7 @@ Example:
         "humidityRef": "$homeduino-airclimate.humidity"
     }
 
+
+###### The value of temperatureRef must be in °C !
     
 Thank you <a href="https://github.com/mwittig">Marcus Wittig</a> and <a href="https://github.com/Icesory">Icesory</a> for helping me in this project and as well  <a href="https://github.com/sweetpi">sweet pi</a> for his work on the software <a href="http://pimatic.org/">Pimatic</a>!
