@@ -23,20 +23,20 @@
     "Dew Point",
     "Pimatic"
   ],
-  "version": "0.9.0",
-  "homepage": "https://github.com/flybysun/dev-pimatic-dewpoint/tree/master",
+  "version": "0.8.0",
+  "homepage": "https://github.com/flybysun/pimatic-dewpoint/tree/master",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git://github.com/flybysun/dev-pimatic-dewpoint.git"
+    "url": "git://github.com/flybysun/pimatic-dewpoint.git"
   },
   "bugs": {
-    "url": "https://github.com/flybysun/dev-pimatic-dewpoint/issues"
+    "url": "https://github.com/flybysun/pimatic-dewpoint/issues"
   },
   "licenses": [
     {
       "type": "GPLv2",
-      "url": "https://github.com/flybysun/dev-pimatic-dewpoint/blob/master/LICENSE"
+      "url": "https://github.com/flybysun/pimatic-dewpoint/blob/master/LICENSE"
     }
   ],
   "maintainers": [
