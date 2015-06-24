@@ -33,12 +33,7 @@
   "bugs": {
     "url": "https://github.com/flybysun/pimatic-dewpoint/issues"
   },
-  "licenses": [
-    {
-      "type": "GPLv2",
-      "url": "https://github.com/flybysun/pimatic-dewpoint/blob/master/LICENSE"
-    }
-  ],
+  "license": "GPL-2.0",
   "maintainers": [
     {
       "name": "flybysun",
