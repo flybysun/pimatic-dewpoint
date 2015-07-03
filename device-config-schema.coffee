@@ -15,5 +15,9 @@ module.exports = {
       humidityRef:
         description: "Holds the reference to the humidity variable to be read"
         type: "string"
+      units:
+        description: "Units used for Temperature (metric/imperial/standard)"
+        format: "string"
+        default: "metric"
   }
 }
