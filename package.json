@@ -2,7 +2,7 @@
   "name": "pimatic-dewpoint",
   "description": "Calculates the dew point from temperature and humidity",
   "author": {
-    "name": "flybysun",
+    "name": "Holger Noeldgen",
     "url": "https://github.com/flybysun"
   },
   "contributors": [
@@ -23,7 +23,7 @@
     "Dew Point",
     "Pimatic"
   ],
-  "version": "0.8.1",
+  "version": "0.8.2",
   "homepage": "https://github.com/flybysun/pimatic-dewpoint/tree/master",
   "private": false,
   "repository": {
