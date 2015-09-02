@@ -46,6 +46,7 @@ where c = 2.16679 gK/J
 - [FAQs.org Temp, Humidity & Dew Point](http://www.faqs.org/faqs/meteorology/temp-dewpoint)
 - [Wikipedia Humidity](https://en.wikipedia.org/wiki/Humidity)
 - [Vaisala Calculation formulas for humidity](http://www.vaisala.com/Vaisala%20Documents/Application%20notes/Humidity_Conversion_Formulas_B210973EN-F.pdf)
+- [Wetterochs](http://www.wetterochs.de/wetter/feuchte.html)
 
 
 ## Usage
