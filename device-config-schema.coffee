@@ -17,7 +17,7 @@ module.exports = {
         type: "string"
       units:
         description: "Units used for Temperature (metric/imperial/standard)"
-        type: "string"
+        enum: ["metric", "imperial", "standard"]
         default: "metric"
   }
 }
