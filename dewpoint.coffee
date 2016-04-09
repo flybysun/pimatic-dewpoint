@@ -46,13 +46,13 @@ module.exports = (env) ->
         acronym: "AH"
 
     constructor: (@config, lastState) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @temperature = lastState?.temperature?.value or 0.0;
       @humidity = lastState?.humidity?.value or 0.0;
       @dewPoint = lastState?.dewPoint?.value or 0.0;
       @absHumidity = lastState?.absHumidity?.value or 0.0;
-      @units = config.units
+      @units = @config.units
       if @units is "imperial"
         @attributes["temperature"].unit = '°F'
         @attributes["dewPoint"].unit = '°F'
@@ -63,8 +63,8 @@ module.exports = (env) ->
       @_exprChangeListeners = []
 
       for reference in [
-        {name: "temperature", expression: config.temperatureRef},
-        {name: "humidity", expression: config.humidityRef}
+        {name: "temperature", expression: @config.temperatureRef},
+        {name: "humidity", expression: @config.humidityRef}
       ]
         do (reference) =>
           name = reference.name
