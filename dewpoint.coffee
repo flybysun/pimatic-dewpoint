@@ -121,17 +121,17 @@ module.exports = (env) ->
 
     _fromUnitTemperature: (t) ->
       if @units is "imperial"
-        return _fahrenheitToCelsius t
+        return @_fahrenheitToCelsius t
       else if @units is "standard"
-        return _kelvinToCelsius t
+        return @_kelvinToCelsius t
       else
         return t
 
     _toUnitTemperature: (t) ->
       if @units is "imperial"
-        return _celsiusToFahrenheit t
+        return @_celsiusToFahrenheit t
       else if @units is "standard"
-        return _celsiusToKelvin t
+        return @_celsiusToKelvin t
       else
         return t
 
