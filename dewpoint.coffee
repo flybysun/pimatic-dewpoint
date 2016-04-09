@@ -2,6 +2,7 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   types = env.require('decl-api').types
+  _ = env.require 'lodash'
 
   class DewPointPlugin extends env.plugins.Plugin
 
@@ -53,6 +54,7 @@ module.exports = (env) ->
       @dewPoint = lastState?.dewPoint?.value or 0.0;
       @absHumidity = lastState?.absHumidity?.value or 0.0;
       @units = @config.units
+      @attributes = _.cloneDeep @attributes
       if @units is "imperial"
         @attributes["temperature"].unit = '°F'
         @attributes["dewPoint"].unit = '°F'
