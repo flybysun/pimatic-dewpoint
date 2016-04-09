@@ -3,10 +3,10 @@ module.exports = {
   DewPointDevice: {
     title: "DewPointDevice config options"
     type: "object"
-    extensions: ["xLink"]
+    extensions: ["xLink", "xAttributeOptions"]
     properties:
       interval:
-        description: "Interval in ms so read the sensor"
+        description: "Interval in ms to read the sensor"
         type: "number"
         default: "10000"
       temperatureRef:
