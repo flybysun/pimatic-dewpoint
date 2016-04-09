@@ -72,7 +72,7 @@ module.exports = (env) ->
 
           evaluate = ( =>
             # wait till VariableManager is ready
-            return Promise.delay(10).then(=>
+            return Promise.delay(10).then( =>
               unless info?
                 info = @varManager.parseVariableExpression(reference.expression)
                 @varManager.notifyOnChange(info.tokens, evaluate)
@@ -135,17 +135,17 @@ module.exports = (env) ->
       else
         return t
 
-    _fahrenheitToCelsius: (f) ->
-      return (f -32) * 5 / 9
+    _fahrenheitToCelsius: (fahrenheit) ->
+      return (fahrenheit - 32) * 5 / 9
 
-    _celsiusToFahrenheit: (c) ->
-      return c * 9 / 5  + 32
+    _celsiusToFahrenheit: (celsius) ->
+      return celsius * 9 / 5  + 32
 
-    _kelvinToCelsius: (k) ->
-      return k - 273.15
+    _kelvinToCelsius: (kelvin) ->
+      return kelvin - 273.15
 
-    _celsiusToKelvin: (c) ->
-      return c + 273.15
+    _celsiusToKelvin: (celsius) ->
+      return celsius + 273.15
 
     # getters for temperature & humidity are created by the constructor using @_createGetter method
     getDewPoint: -> Promise.resolve(@dewPoint)
