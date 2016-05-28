@@ -96,6 +96,10 @@ module.exports = (env) ->
           @_createGetter(name, evaluate)
       super()
 
+    destroy: () ->
+      @varManager.cancelNotifyOnChange(cl) for cl in @_exprChangeListeners
+      super()
+
     dewPointCalculation: ->
 
       t = @_fromUnitTemperature(@temperature)
