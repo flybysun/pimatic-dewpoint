@@ -2,6 +2,7 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   types = env.require('decl-api').types
+  _ = env.require 'lodash'
 
   class DewPointPlugin extends env.plugins.Plugin
 
@@ -46,13 +47,14 @@ module.exports = (env) ->
         acronym: "AH"
 
     constructor: (@config, lastState) ->
-      @id = config.id
-      @name = config.name
+      @id = @config.id
+      @name = @config.name
       @temperature = lastState?.temperature?.value or 0.0;
       @humidity = lastState?.humidity?.value or 0.0;
       @dewPoint = lastState?.dewPoint?.value or 0.0;
       @absHumidity = lastState?.absHumidity?.value or 0.0;
-      @units = config.units
+      @units = @config.units
+      @attributes = _.cloneDeep @attributes
       if @units is "imperial"
         @attributes["temperature"].unit = '°F'
         @attributes["dewPoint"].unit = '°F'
@@ -63,8 +65,8 @@ module.exports = (env) ->
       @_exprChangeListeners = []
 
       for reference in [
-        {name: "temperature", expression: config.temperatureRef},
-        {name: "humidity", expression: config.humidityRef}
+        {name: "temperature", expression: @config.temperatureRef},
+        {name: "humidity", expression: @config.humidityRef}
       ]
         do (reference) =>
           name = reference.name
@@ -72,7 +74,7 @@ module.exports = (env) ->
 
           evaluate = ( =>
             # wait till VariableManager is ready
-            return Promise.delay(10).then(=>
+            return Promise.delay(10).then( =>
               unless info?
                 info = @varManager.parseVariableExpression(reference.expression)
                 @varManager.notifyOnChange(info.tokens, evaluate)
@@ -92,6 +94,10 @@ module.exports = (env) ->
             )
           )
           @_createGetter(name, evaluate)
+      super()
+
+    destroy: () ->
+      @varManager.cancelNotifyOnChange(cl) for cl in @_exprChangeListeners
       super()
 
     dewPointCalculation: ->
@@ -121,31 +127,31 @@ module.exports = (env) ->
 
     _fromUnitTemperature: (t) ->
       if @units is "imperial"
-        return _fahrenheitToCelsius t
+        return @_fahrenheitToCelsius t
       else if @units is "standard"
-        return _kelvinToCelsius t
+        return @_kelvinToCelsius t
       else
         return t
 
     _toUnitTemperature: (t) ->
       if @units is "imperial"
-        return _celsiusToFahrenheit t
+        return @_celsiusToFahrenheit t
       else if @units is "standard"
-        return _celsiusToKelvin t
+        return @_celsiusToKelvin t
       else
         return t
 
-    _fahrenheitToCelsius: (f) ->
-      return (f -32) * 5 / 9
+    _fahrenheitToCelsius: (fahrenheit) ->
+      return (fahrenheit - 32) * 5 / 9
 
-    _celsiusToFahrenheit: (c) ->
-      return c * 9 / 5  + 32
+    _celsiusToFahrenheit: (celsius) ->
+      return celsius * 9 / 5  + 32
 
-    _kelvinToCelsius: (k) ->
-      return k - 273.15
+    _kelvinToCelsius: (kelvin) ->
+      return kelvin - 273.15
 
-    _celsiusToKelvin: (c) ->
-      return c + 273.15
+    _celsiusToKelvin: (celsius) ->
+      return celsius + 273.15
 
     # getters for temperature & humidity are created by the constructor using @_createGetter method
     getDewPoint: -> Promise.resolve(@dewPoint)
