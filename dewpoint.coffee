@@ -121,9 +121,8 @@ module.exports = (env) ->
       @_setAttribute 'absHumidity', ah
 
     _setAttribute: (attributeName, value) ->
-      if @[attributeName] isnt value
-        @[attributeName] = value
-        @emit attributeName, value
+      @[attributeName] = value
+      @emit attributeName, value
 
     _fromUnitTemperature: (t) ->
       if @units is "imperial"
