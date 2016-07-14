@@ -24,14 +24,14 @@
     "Pimatic"
   ],
   "version": "0.8.4",
-  "homepage": "https://github.com/mwittig/pimatic-dewpoint/tree/master",
+  "homepage": "https://github.com/flybysun/pimatic-dewpoint/tree/master",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git://github.com/mwittig/pimatic-dewpoint.git"
+    "url": "git://github.com/flybysun/pimatic-dewpoint.git"
   },
   "bugs": {
-    "url": "https://github.com/mwittig/pimatic-dewpoint/issues"
+    "url": "https://github.com/flybysun/pimatic-dewpoint/issues"
   },
   "license": "GPL-2.0",
   "maintainers": [
