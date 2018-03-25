@@ -15,6 +15,7 @@
   "files": [
     "dewpoint.coffee",
     "README.md",
+    "HISTORY.md",
     "LICENSE",
     "dewpoint-config-schema.coffee",
     "device-config-schema.coffee"
