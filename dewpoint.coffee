@@ -23,6 +23,8 @@ module.exports = (env) ->
     humidity: 0.0
     dewPoint: 0.0
     absHumidity: 0.0
+    windspeed: 0.0
+    windchill: 0.0
 
     attributes:
       temperature:
@@ -45,6 +47,17 @@ module.exports = (env) ->
         type: types.number
         unit: "g/m³"
         acronym: "AH"
+      windspeed:
+        description: "Windspeed"
+        type: types.number
+        unit: "km/h"
+        acronym: 'WS'
+      windchill:
+        description: "Windchill Temperature"
+        type: types.number
+        unit: "°C"
+        acronym: 'WCT'
+
 
     constructor: (@config, lastState) ->
       @id = @config.id
@@ -53,20 +66,42 @@ module.exports = (env) ->
       @humidity = lastState?.humidity?.value or 0.0;
       @dewPoint = lastState?.dewPoint?.value or 0.0;
       @absHumidity = lastState?.absHumidity?.value or 0.0;
+      @windchill = lastState?.windchill?.value or 0.0;
+      @windspeed = lastState?.windspeed?.value or 0.0;
+      
+      #@heatindex = lastState?.heatindex?.value or 0.0;
       @units = @config.units
       @attributes = _.cloneDeep @attributes
       if @units is "imperial"
         @attributes["temperature"].unit = '°F'
         @attributes["dewPoint"].unit = '°F'
+        @attributes["windchill"].unit = '°F'
       else if @units is "standard"
         @attributes["temperature"].unit = 'K'
         @attributes["dewPoint"].unit = 'K'
+        @attributes["windchill"].unit = 'K'
+
+      
+      @windUnits = @config.windUnits
+      @attributes = _.cloneDeep @attributes
+      if @windUnits is "ms"
+        @attributes["windspeed"].unit = 'm/s'
+      else if @windUnits is "kmh"
+        @attributes["windspeed"].unit ='km/h'
+      else if @windUnits is "mph"
+        @attributes["windspeed"].unit ='mph'        
+      else if @windUnits is "fts"
+        @attributes["windspeed"].unit ='ft/s'
+      else if @windUnits is "knots"
+        @attributes["windspeed"].unit ='knots'        
+        
       @varManager = plugin.framework.variableManager #so you get the variableManager
       @_exprChangeListeners = []
 
       for reference in [
         {name: "temperature", expression: @config.temperatureRef},
         {name: "humidity", expression: @config.humidityRef}
+        {name: "windspeed", expression: @config.windspeedRef}
       ]
         do (reference) =>
           name = reference.name
@@ -103,6 +138,7 @@ module.exports = (env) ->
     dewPointCalculation: ->
 
       t = @_fromUnitTemperature(@temperature)
+      
       if t >= 0
         a = 7.5
         b = 237.3
@@ -119,6 +155,13 @@ module.exports = (env) ->
       ah = 2.16679 * ((100 * dd) / (273.15 + t))
       env.logger.debug 'absHumidity', ah
       @_setAttribute 'absHumidity', ah
+
+      vw = @_fromUnitWindSpeed(@windspeed)
+      vp = Math.pow(vw, 0.16)
+      wct = 13.12 + 0.6125 * t - 11.37 * vp + 0.3965 * t * vp
+      env.logger.debug 'windchill', @_toUnitTemperature(wct)
+      @_setAttribute 'windchill', @_toUnitTemperature(wct)
+
 
     _setAttribute: (attributeName, value) ->
       @[attributeName] = value
@@ -140,6 +183,18 @@ module.exports = (env) ->
       else
         return t
 
+    _fromUnitWindSpeed: (vw) ->
+      if @windUnits is "mph"
+        return @_milesToKm vw
+      else if @windUnits is "ms"
+        return @_msToKm vw
+      else if @windUnits is "fts"
+        return @_ftsToKm vw
+      else if @windUnits is "knots"
+        return @_knotsToKm vw    
+      else 
+        return vw
+
     _fahrenheitToCelsius: (fahrenheit) ->
       return (fahrenheit - 32) * 5 / 9
 
@@ -151,9 +206,22 @@ module.exports = (env) ->
 
     _celsiusToKelvin: (celsius) ->
       return celsius + 273.15
+  
+    _milesToKm: (miles) ->
+      return (miles * 1.60934)
+
+    _msToKm: (ms) ->
+      return (ms * 3.6)  
+    
+    _ftsToKm: (fts) ->  
+      return (fts * 1.09728)
+  
+    _knotsToKm: (knots) ->
+      return (knots * 1.852)
 
     # getters for temperature & humidity are created by the constructor using @_createGetter method
     getDewPoint: -> Promise.resolve(@dewPoint)
     getAbsHumidity: -> Promise.resolve(@absHumidity)
+    getWindchill: -> Promise.resolve(@windchill)
 
   return plugin

@@ -12,6 +12,9 @@
     "class": "DewPointDevice",
     "name": "Dew Point",
     "temperatureRef": "$homeduino-airclimate.temperature",
-    "humidityRef": "$homeduino-airclimate.humidity"
+    "humidityRef": "$homeduino-airclimate.humidity",
+    "windspeedRef": "$Weather.windspeed",
+    "windUnits": "ms",
+    "units": "metric"
   }
 ]
