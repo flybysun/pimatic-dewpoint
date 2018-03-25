@@ -12,16 +12,22 @@ module.exports = {
       temperatureRef:
         description: "Holds the reference to the temperature variable to be read"
         type: "string"
+        default: "0.0"
       humidityRef:
         description: "Holds the reference to the humidity variable to be read"
         type: "string"
+        default: "0"
+      windSpeedRef:
+        description: "Holds the reference to the wind speed to be read"
+        type: "string"
+        default: "0.0"
       units:
         description: "Units used for Temperature (metric/imperial/standard)"
         enum: ["metric", "imperial", "standard"]
         default: "metric"
       windUnits:
         description: "Units used for the Wind Speed (m/s, km/h, ft/s, mph, knots)"
-        enum: ["ms", "kmh", "fts", "mph", "knots"]
-        default: "kmh"    
+        enum: ["m/s", "km/h", "ft/s", "m/ph", "knots"]
+        default: "km/h"
   }
 }

@@ -23,8 +23,10 @@ module.exports = (env) ->
     humidity: 0.0
     dewPoint: 0.0
     absHumidity: 0.0
-    windspeed: 0.0
-    windchill: 0.0
+    windSpeed: 0.0
+    windChill: 0.0
+    heatIndex: 0.0
+    apparentTemperature: 0.0
 
     attributes:
       temperature:
@@ -47,53 +49,57 @@ module.exports = (env) ->
         type: types.number
         unit: "g/m³"
         acronym: "AH"
-      windspeed:
+      windSpeed:
         description: "Windspeed"
         type: types.number
         unit: "km/h"
         acronym: 'WS'
-      windchill:
+      windChill:
         description: "Windchill Temperature"
         type: types.number
         unit: "°C"
         acronym: 'WCT'
+      heatIndex:
+        description: "Heat Index Temperature"
+        type: types.number
+        unit: "°C"
+        acronym: 'HIT'
+      apparentTemperature:
+        description: "Apparent Temperature"
+        type: types.number
+        unit: "°C"
+        acronym: 'AT'
 
 
     constructor: (@config, lastState) ->
       @id = @config.id
       @name = @config.name
-      @temperature = lastState?.temperature?.value or 0.0;
-      @humidity = lastState?.humidity?.value or 0.0;
-      @dewPoint = lastState?.dewPoint?.value or 0.0;
-      @absHumidity = lastState?.absHumidity?.value or 0.0;
-      @windchill = lastState?.windchill?.value or 0.0;
-      @windspeed = lastState?.windspeed?.value or 0.0;
-      
-      #@heatindex = lastState?.heatindex?.value or 0.0;
+      @temperature = lastState?.temperature?.value or 0.0
+      @humidity = lastState?.humidity?.value or 0.0
+      @dewPoint = lastState?.dewPoint?.value or 0.0
+      @absHumidity = lastState?.absHumidity?.value or 0.0
+      @windSpeed = lastState?.windSpeed?.value or 0.0
+      @windChill = lastState?.windChill?.value or 0.0
+      @heatIndex = lastState?.heatIndex?.value or 0.0
+      @apparentTemperature = lastState?.apparentTemperature?.value or 0.0
+
       @units = @config.units
       @attributes = _.cloneDeep @attributes
       if @units is "imperial"
         @attributes["temperature"].unit = '°F'
         @attributes["dewPoint"].unit = '°F'
-        @attributes["windchill"].unit = '°F'
+        @attributes["windChill"].unit = '°F'
+        @attributes["heatIndex"].unit = '°F'
+        @attributes["apparentTemperature"].unit = '°F'
       else if @units is "standard"
         @attributes["temperature"].unit = 'K'
         @attributes["dewPoint"].unit = 'K'
-        @attributes["windchill"].unit = 'K'
+        @attributes["windChill"].unit = 'K'
+        @attributes["heatIndex"].unit = 'K'
+        @attributes["apparentTemperature"].unit = 'K'
 
-      
       @windUnits = @config.windUnits
-      @attributes = _.cloneDeep @attributes
-      if @windUnits is "ms"
-        @attributes["windspeed"].unit = 'm/s'
-      else if @windUnits is "kmh"
-        @attributes["windspeed"].unit ='km/h'
-      else if @windUnits is "mph"
-        @attributes["windspeed"].unit ='mph'        
-      else if @windUnits is "fts"
-        @attributes["windspeed"].unit ='ft/s'
-      else if @windUnits is "knots"
-        @attributes["windspeed"].unit ='knots'        
+      @attributes["windSpeed"].unit = @windUnits
         
       @varManager = plugin.framework.variableManager #so you get the variableManager
       @_exprChangeListeners = []
@@ -101,7 +107,7 @@ module.exports = (env) ->
       for reference in [
         {name: "temperature", expression: @config.temperatureRef},
         {name: "humidity", expression: @config.humidityRef}
-        {name: "windspeed", expression: @config.windspeedRef}
+        {name: "windSpeed", expression: @config.windSpeedRef}
       ]
         do (reference) =>
           name = reference.name
@@ -124,7 +130,7 @@ module.exports = (env) ->
               if val
                 env.logger.debug name, val
                 @_setAttribute name, val
-                @dewPointCalculation()
+                @calcValues()
               return @[name]
             )
           )
@@ -135,10 +141,39 @@ module.exports = (env) ->
       @varManager.cancelNotifyOnChange(cl) for cl in @_exprChangeListeners
       super()
 
-    dewPointCalculation: ->
+    calcHeatIndex: (t, rh, dp) ->
+      if t < 27 or rh < 40 or dp < 12
+        t
+      else
+        c1 = -8.784695
+        c2 = 1.61139411
+        c3 = 2.338549
+        c4 = -0.14611605
+        c5 = -1.2308094 * 0.01
+        c6 = -1.6424828 * 0.01
+        c7 = 2.211732 * 0.001
+        c8 = 7.2546 * 0.0001
+        c9 = -3.582 * 0.000001
 
+        prh = rh * rh
+        pt = t * t
+        c1 + c2*t + c3*rh + c4*t*rh + c5*pt + c6*prh + c7*pt*rh + c8*t*prh + c9*pt*prh
+
+    calcWindChill: (t, vw) ->
+      if t >= 10
+        t
+      else
+        if vw >= 4.8 and vw <= 177
+          13.12 + 0.6215 * t + (0.3965 * t - 11.37) * Math.pow(vw, 0.16)
+        else if vw < 4.8
+          t + 0.2 * (0.1345 * t - 1.59) * vw
+        else
+          t
+
+    calcValues: ->
       t = @_fromUnitTemperature(@temperature)
-      
+
+      # dewPoint
       if t >= 0
         a = 7.5
         b = 237.3
@@ -152,16 +187,27 @@ module.exports = (env) ->
       td = (b * v) / (a - v)
       env.logger.debug 'dewPoint', @_toUnitTemperature(td)
       @_setAttribute 'dewPoint', @_toUnitTemperature(td)
+
+      # absHumidity
       ah = 2.16679 * ((100 * dd) / (273.15 + t))
       env.logger.debug 'absHumidity', ah
       @_setAttribute 'absHumidity', ah
 
-      vw = @_fromUnitWindSpeed(@windspeed)
-      vp = Math.pow(vw, 0.16)
-      wct = 13.12 + 0.6125 * t - 11.37 * vp + 0.3965 * t * vp
-      env.logger.debug 'windchill', @_toUnitTemperature(wct)
-      @_setAttribute 'windchill', @_toUnitTemperature(wct)
+      # windChill
+      vw = @_fromUnitWindSpeed(@windSpeed)
+      wct = @calcWindChill t, vw
+      env.logger.debug 'windChill', @_toUnitTemperature(wct)
+      @_setAttribute 'windChill', @_toUnitTemperature(wct)
 
+      # heatIndex
+      hit = @calcHeatIndex(t, @humidity, td)
+      env.logger.debug 'heatIndex', @_toUnitTemperature(hit)
+      @_setAttribute 'heatIndex', @_toUnitTemperature(hit)
+
+      # apparentTemperature
+      at = if t < 10 then vw else hit
+      env.logger.debug 'apparentTemperature', @_toUnitTemperature(at)
+      @_setAttribute 'apparentTemperature', @_toUnitTemperature(at)
 
     _setAttribute: (attributeName, value) ->
       @[attributeName] = value
@@ -184,11 +230,11 @@ module.exports = (env) ->
         return t
 
     _fromUnitWindSpeed: (vw) ->
-      if @windUnits is "mph"
+      if @windUnits is "mp/h"
         return @_milesToKm vw
-      else if @windUnits is "ms"
+      else if @windUnits is "m/s"
         return @_msToKm vw
-      else if @windUnits is "fts"
+      else if @windUnits is "ft/s"
         return @_ftsToKm vw
       else if @windUnits is "knots"
         return @_knotsToKm vw    
@@ -222,6 +268,8 @@ module.exports = (env) ->
     # getters for temperature & humidity are created by the constructor using @_createGetter method
     getDewPoint: -> Promise.resolve(@dewPoint)
     getAbsHumidity: -> Promise.resolve(@absHumidity)
-    getWindchill: -> Promise.resolve(@windchill)
+    getWindChill: -> Promise.resolve(@windChill)
+    getHeatIndex: -> Promise.resolve(@heatIndex)
+    getApparentTemperature: -> Promise.resolve(@apparentTemperature)
 
   return plugin

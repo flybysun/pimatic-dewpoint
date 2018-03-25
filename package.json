@@ -1,6 +1,6 @@
 {
   "name": "pimatic-dewpoint",
-  "description": "Calculates the dew point from temperature and humidity",
+  "description": "Calculates dew point, absolute humidity, wind chill factor, heat index, and apparent temperature",
   "author": {
     "name": "Holger Noeldgen",
     "url": "https://github.com/flybysun"
@@ -21,6 +21,11 @@
   ],
   "keywords": [
     "Dew Point",
+    "Absolute Humidity",
+    "Wind Chill Factor",
+    "Indchill",
+    "Heat Index",
+    "Apparent Temperature",
     "Pimatic"
   ],
   "version": "0.9.1",
@@ -48,7 +53,7 @@
   "dependencies": {
   },
   "peerDependencies": {
-    "pimatic": ">=0.8.0 <1.0.0"
+    "pimatic": ">=0.9.0 <1.0.0"
   },
   "engines": {
     "node": ">= 4",

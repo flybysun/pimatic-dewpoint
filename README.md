@@ -1,8 +1,12 @@
 # Pimatic-Dewpoint
 
-Dew point and absolute humidity calculation support for <a href="http://pimatic.org/">Pimatic</a>. 
-This plugin calculates the dew point temperature and absolute humidity from the given temperature and relative humidity 
-variables in Pimatic. 
+Dew point, absolute humidity, wind chill factor, heat index, and apparent temperature calculation support 
+for <a href="http://pimatic.org/">Pimatic</a>. 
+
+This plugin calculates the dew point temperature, absolute humidity, and the heat index temperature
+from the given temperature and relative humidity variables in Pimatic. Additionally, it can also calculate the
+wind chill factor and the apparent temperature if a variable reference for wind speed is provided. For all values
+metric, imperial, and ISO measures are supported.
 
 ## Theoretical Background
 
@@ -43,9 +47,61 @@ Absolute humidity is the total mass of water vapor present in a given volume of 
 where c = 2.16679 gK/J
   and P<sub>v</sub> denotes the vapour pressure in Pa
   and T denotes the temperature in K
+
+### Wind Chill
+
+For temperatures below 10 degrees Celsius the wind chill is the lowering of the body temperature due to 
+the passing-flow of lower-temperature air (wind). The calculation is performed according to the Canada Windchill Index
+established in 2001. The formula for metric values is as follows:
+
+<i>T<sub>wc</sub> = 13.12 + 0.6215T<sub>a</sub> + (0.3965v<sub>a</sub> - 11.37)v<sup>+0.16</sup></i>
+
+where <i>T<sub>wc</sub></i> is the wind chill temperature,
+ and <i>T<sub>a</sub></i> is the air temperature, 
+ and <i>v</i> is the wind speed in km per hour.
+
+### Heat Index
+
+For temperatures starting from 27 degrees Celsius, heat index combines temperature and relative humidity as an attempt 
+to determine the human-perceived equivalent temperature. The calculation is based on the work of Robert G. Steadman, 
+published in the Journal of Applied Meteorology in 1979. The formula uses several constants c<sub>1</sub> through
+ c<sub>9</sub> as follows:
+ 
+<i>T<sub>hi</sub> = c<sub>1</sub> + c<sub>2</sub> Ta + c<sub>3</sub> R + c<sub>4</sub> Ta R + c<sub>5</sub> Ta<sup>2</sup> + c<sub>6</sub> R<sup>2</sup> + c<sub>7</sub> Ta<sup>2</sup>R + c<sub>8</sub> Ta R<sup>2</sup> + c<sub>9</sub> Ta<sup>2</sup> R<sup>2</sup></i>
+
+where <i>T<sub>hi</sub></i> is the heat index,
+  and <i>T<sub>a</sub></i> is the air temperature, 
+  and <i>R</i> is the relative humidity. 
   
+| constant      | value for Celsius |
+|:--------------|:------------------|
+| c<sub>1</sub> | −8.784695         |
+| c<sub>2</sub> | 1.61139411        |
+| c<sub>3</sub> | 2.338549          |
+| c<sub>4</sub> | −0.14611605       |
+| c<sub>5</sub> | −1.2308094 · 10<sup>−2</sup> |
+| c<sub>6</sub> | −1.6424828 · 10<sup>−2</sup> |
+| c<sub>7</sub> | 2.211732 · 10<sup>−3</sup> |
+| c<sub>8</sub> | 7.2546 · 10<sup>−4</sup> |
+| c<sub>9</sub> | −3.582 · 10<sup>−6</sup> |
+
+### Apparent Temperature
+
+Apparent temperature is the temperature equivalent perceived by humans, caused by the combined effects of 
+ air temperature, relative humidity and wind speed. It is determined as follows:
+ * wind chill temperature for air temperature below 10 degrees Celsius
+ * heat index temperature for air temperatures starting from 27 degrees Celsius and relative humidity staring from 40%
+ * air temperature, otherwise
+ 
+ Note, the wet bulb globe temperature is not used.
+
 ### Sources 
+
 - [Wikipedia Dew Point](https://en.wikipedia.org/wiki/Dew_point)
+- [Wikipedia Wind Chill](https://en.wikipedia.org/wiki/Wind_chill)
+- [Wikipedia Heat Index](https://en.wikipedia.org/wiki/Heat_index)
+- [Wikipedia-Deutsch Hitzeindex](https://de.wikipedia.org/wiki/Hitzeindex)
+- [Wikipedia Apparent Temperature](https://en.wikipedia.org/wiki/Apparent_temperature)
 - [FAQs.org Temp, Humidity & Dew Point](http://www.faqs.org/faqs/meteorology/temp-dewpoint)
 - [Wikipedia Humidity](https://en.wikipedia.org/wiki/Humidity)
 - [Vaisala Calculation formulas for humidity](http://www.vaisala.com/Vaisala%20Documents/Application%20notes/Humidity_Conversion_Formulas_B210973EN-F.pdf)
